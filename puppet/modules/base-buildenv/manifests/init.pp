@@ -2,7 +2,7 @@ class base-buildenv ($gcc_version = '4.7')  {
 
   if $gcc_version == '4.8' {
     case $::operatingsystem {
-      ubuntu: {
+      'Debian','Ubuntu': {
         exec {'apt-add-repository-toolchain':
           path       => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
           command => 'apt-add-repository -y ppa:ubuntu-toolchain-r/test',
