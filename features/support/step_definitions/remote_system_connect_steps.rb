@@ -1,5 +1,5 @@
 When /^I execute `([^`]*)` on a running system$/ do |cmd|
-  @execute_command="vagrant ssh_config | ssh -q -F /dev/stdin default"
+  @execute_command="vagrant ssh-config | ssh -q -F /dev/stdin default"
   @connect_failed=false
   unless @execute_command.nil?
     steps %Q{ When I run `#{@execute_command} "#{cmd}"` }
@@ -10,7 +10,7 @@ When /^I execute `([^`]*)` on a running system$/ do |cmd|
 end
 
 When /^I connect to a running system interactively$/ do
-  @connect_command="vagrant ssh"
+  @connect_command="call vagrant ssh"
   @connect_failed=false
   unless @connect_command.nil?
     steps %Q{
