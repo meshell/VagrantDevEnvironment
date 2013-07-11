@@ -5,8 +5,8 @@ class {'base-buildenv':
 
 $user_developer = 'developer'
 $user_pwd = '$6$hLUKVOmi$CjXrA8oL9e/3irGl.b3uOllQBgD4P2kjcR3i/EYXfdhLD/5wg./sYO5PccanbEiN1sB6gBFLhslQAEkJjwhd.0'
-$repo_name = 'KarateTournamentManger'
-$repo_url = 'https://github.com/meshell/KarateTournamentManager.git'
+$repo_name = 'AgileEmbeddedDevelopmentExample'
+$repo_url = 'git@github.com:meshell/AgileEmbeddedDevelopmentExample.git'
 $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
 
@@ -14,23 +14,6 @@ $git_author_email = 'estermann.michel@gmail.com'
 exec {'apt-get update':
   path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
   command => 'apt-get update',
-}
-
-package {'git':
-  ensure    => 'installed',
-}
-
-# Configure Git
-exec {'git-author-name':
-  command => "/usr/bin/git config --global user.name '${git_author_name}'",
-  require    => Package['git'],
-  unless    => "/usr/bin/git config --global --get user.name|grep '${git_author_name}'",
-}
-
-exec {'git-author-email':
-  command => "/usr/bin/git config --global user.email '${git_author_email}'",
-  require    => Package['git'],
-  unless    => "/usr/bin/git config --global --get user.email|grep '{$git_author_email}'",
 }
 
 package {'cucumber':
@@ -60,7 +43,7 @@ package {'qtcreator':
 
 group {"${user_developer}":
   ensure => present,
-}
+} ->
 
 user {"${user_developer}":
   ensure        => present,
@@ -70,8 +53,22 @@ user {"${user_developer}":
   home           => "/home/${user_developer}",
   managehome => true,
   password      => $user_pwd,
-  require          => Group["${user_developer}"],
 }
+
+package {'git':
+  ensure    => 'installed',
+} ->
+
+# Configure Git
+exec {'git-author-name':
+  command => "/usr/bin/git config --global user.name '${git_author_name}'",
+  unless    => "/usr/bin/git config --global --get user.name|grep '${git_author_name}'",
+} ->
+
+exec {'git-author-email':
+  command => "/usr/bin/git config --global user.email '${git_author_email}'",
+  unless    => "/usr/bin/git config --global --get user.email|grep '{$git_author_email}'",
+} ->
 
 vcsrepo {"/home/$user_developer/${repo_name}":
     ensure => present,
@@ -80,6 +77,51 @@ vcsrepo {"/home/$user_developer/${repo_name}":
     revision => 'master',
     require  => Package['git'],
     user      => $user_developer,
+}
+
+# +++++++++++++++++
+# Sonar
+# +++++++++++++++++
+$sonar_user= 'sonar'
+$sonar_pwd= 'sonar'
+
+$jdbc = {
+  url               => 'jdbc:mysql://localhost:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true',
+  driver_class_name => 'com.mysql.jdbc.Driver',
+  validation_query  => 'select 1',
+  username          => $sonar_user,
+  password          => $sonar_pwd,
+}
+
+class { 'mysql::server':
+  config_hash => { 'root_password' => 'password' }
+} ->
+
+class { 'mysql::java': 
+} ->
+
+mysql::db { 'sonar':
+  user     => $sonar_user,
+  password => $sonar_pwd,
+  host     => 'localhost',
+  grant    => ['all'],
+} ->
+
+class {'java':
+} ->
+
+class {'maven::maven': }  ->
+
+class { 'sonar' : 
+  version     => '3.6', 
+  jdbc         => $jdbc,
+} 
+
+sonar::plugin { 'sonar-cxx-plugin' :
+  groupid    => 'org.codehaus.sonar-plugins',
+  artifactid => 'sonar-cxx-plugin',
+  version    => '0.2',
+  notify     => Service['sonar'],
 }
 
 # Dependencies
