@@ -1,0 +1,11 @@
+name    'puppet-sonar_runner'
+version '0.1.0'
+source 'https://github.com/meshell/puppet-sonar_runner'
+author 'Michel Estermann'
+license 'Apache License, Version 2.0'
+summary 'A module to install sonar-runner'
+description ''
+project_page 'https://github.com/meshell/puppet-sonar_runner'
+
+## Add dependencies, if any:
+dependency 'maestrodev-wget', '>=0.0.1'

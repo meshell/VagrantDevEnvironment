@@ -1,12 +1,14 @@
 class {'base-buildenv':
   gcc_version => '4.8',
-  before => Package['qtcreator'],
-}
+} 
+
+class {'qt5':
+ }
 
 $user_developer = 'developer'
 $user_pwd = '$6$hLUKVOmi$CjXrA8oL9e/3irGl.b3uOllQBgD4P2kjcR3i/EYXfdhLD/5wg./sYO5PccanbEiN1sB6gBFLhslQAEkJjwhd.0'
-$repo_name = 'AgileEmbeddedDevelopmentExample'
-$repo_url = 'git@github.com:meshell/AgileEmbeddedDevelopmentExample.git'
+$repo_name = 'KarateTournamentManager'
+$repo_url = 'https://github.com/meshell/KarateTournamentManager.git'
 $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
 
@@ -32,14 +34,6 @@ package {'subversion':
 package {'firefox':
   ensure => 'installed',
 }
-package {'dbus-x11':
-  ensure => 'installed',
-}
-
-package {'qtcreator':
-  ensure => 'installed',
-  require  => Package['dbus-x11'],
-}
 
 group {"${user_developer}":
   ensure => present,
@@ -53,6 +47,16 @@ user {"${user_developer}":
   home           => "/home/${user_developer}",
   managehome => true,
   password      => $user_pwd,
+} ->
+
+augeas { "sudodeveloper":
+  context => "/files/etc/sudoers",
+  changes => [
+    "set spec[user = '${user_developer}']/user ${user_developer}",
+    "set spec[user = '${user_developer}']/host_group/host ALL",
+    "set spec[user = '${user_developer}']/host_group/command ALL",
+    "set spec[user = '${user_developer}']/host_group/command/runas_user ALL",
+  ],
 }
 
 package {'git':
@@ -110,18 +114,35 @@ mysql::db { 'sonar':
 class {'java':
 } ->
 
-class {'maven::maven': }  ->
-
 class { 'sonar' : 
-  version     => '3.6', 
+  version     => '3.7', 
   jdbc         => $jdbc,
 } 
 
-sonar::plugin { 'sonar-cxx-plugin' :
-  groupid    => 'org.codehaus.sonar-plugins',
-  artifactid => 'sonar-cxx-plugin',
-  version    => '0.2',
+include wget
+
+# Install cxx plugin manualy
+
+$cxx_plugin_download_url = 'http://repository.codehaus.org/org/codehaus/sonar-plugins/cxx/sonar-cxx-plugin'
+$cxx_plugin_version='0.9'
+
+wget::fetch { 'download-cxx_plugin':
+  source      => "${cxx_plugin_download_url}/${cxx_plugin_version}/sonar-cxx-plugin-${cxx_plugin_version}.jar",
+  destination => "${sonar::home}/extensions/plugins/sonar-cxx-plugin-${cxx_plugin_version}.jar",
   notify     => Service['sonar'],
+}
+
+
+#sonar::plugin { 'sonar-cxx-plugin' :
+# groupid    => 'org.codehaus.sonar-plugins',
+#  artifactid => 'sonar-cxx-plugin',
+#  version    => '0.9',
+#  notify     => Service['sonar'],
+#} 
+
+class {'sonar-runner' :
+  version     => '2.3', 
+  jdbc         => $jdbc,
 }
 
 # Dependencies
