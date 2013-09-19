@@ -16,6 +16,11 @@ $git_author_email = 'estermann.michel@gmail.com'
 exec {'apt-get update':
   path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
   command => 'apt-get update',
+} ->
+exec {'safe-upgrade':
+  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+  command => 'aptitude -y -f safe-upgrade',
+  timeout     => 1800,
 }
 
 package {'cucumber':
@@ -27,11 +32,27 @@ package {'cppcheck':
   ensure => 'installed',
 }
 
+package {'rats':
+  ensure => 'installed',
+}
+
+package {'valgrind':
+  ensure => 'installed',
+}
+
 package {'subversion':
   ensure => 'installed',
 }
 
 package {'firefox':
+  ensure => 'installed',
+}
+
+package {'emacs':
+  ensure => 'installed',
+}
+
+package {'pcmanfm':
   ensure => 'installed',
 }
 
@@ -60,6 +81,10 @@ augeas { "sudodeveloper":
 }
 
 package {'git':
+  ensure    => 'installed',
+} ->
+
+package {'gitk':
   ensure    => 'installed',
 } ->
 
@@ -145,7 +170,13 @@ class {'sonar-runner' :
   jdbc         => $jdbc,
 }
 
+package {'eclipse-cdt':
+  ensure    => 'installed',
+  require => Class['java'],
+} 
+
+
 # Dependencies
 
-Exec['apt-get update'] -> Package <| |>
+Exec['safe-upgrade'] -> Package <| |>
 User['developer']  -> Vcsrepo <| |>
