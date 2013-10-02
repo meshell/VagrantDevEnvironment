@@ -2,7 +2,7 @@ class base-buildenv ($gcc_version = '4.7')  {
 
   if $gcc_version == '4.8' {
     case $::operatingsystem {
-      'Debian','Ubuntu': {
+      'Ubuntu': {
         exec {'apt-add-repository-toolchain':
           path       => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
           command => 'apt-add-repository -y ppa:ubuntu-toolchain-r/test',
@@ -25,7 +25,10 @@ class base-buildenv ($gcc_version = '4.7')  {
          }
       }
       default: {
-        fail("g++ ${gcc_version} is not supported yet on ${::operatingsystem}")
+          warning("g++ ${gcc_version} is not supported yet on ${::operatingsystem} install gcc 4.7 instead")
+        package { 'g++':
+            ensure => 'latest',
+          }
       }
     }
   } else {

@@ -7,8 +7,11 @@ class {'qt5':
 
 $user_developer = 'developer'
 $user_pwd = '$6$hLUKVOmi$CjXrA8oL9e/3irGl.b3uOllQBgD4P2kjcR3i/EYXfdhLD/5wg./sYO5PccanbEiN1sB6gBFLhslQAEkJjwhd.0'
-$repo_name = 'KarateTournamentManager'
-$repo_url = 'https://github.com/meshell/KarateTournamentManager.git'
+
+# github repo
+# TODO insert your data
+$repo_name = 'Cpp_CMake_project_template'
+$repo_url = 'https://github.com/meshell/Cpp_CMake_project_template.git'
 $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
 
@@ -23,9 +26,20 @@ exec {'safe-upgrade':
   timeout     => 1800,
 }
 
-package {'cucumber':
-  ensure => 'installed',
-  provider => 'gem',
+class cucumber {
+  case $::operatingsystem {
+    'Ubuntu': {
+      package {'cucumber':
+        ensure => 'installed',
+        provider => 'gem',
+      }
+    }
+    'Debian': {
+      package {'cucumber':
+        ensure => 'installed',
+      }
+    }
+  } 
 }
 
 package {'cppcheck':
@@ -44,9 +58,9 @@ package {'subversion':
   ensure => 'installed',
 }
 
-package {'firefox':
-  ensure => 'installed',
-}
+#package {'firefox':
+ # ensure => 'installed',
+#}
 
 package {'emacs':
   ensure => 'installed',
@@ -142,7 +156,7 @@ class {'java':
 class { 'sonar' : 
   version     => '3.7', 
   jdbc         => $jdbc,
-} 
+}
 
 include wget
 
@@ -154,7 +168,9 @@ $cxx_plugin_version='0.9'
 wget::fetch { 'download-cxx_plugin':
   source      => "${cxx_plugin_download_url}/${cxx_plugin_version}/sonar-cxx-plugin-${cxx_plugin_version}.jar",
   destination => "${sonar::home}/extensions/plugins/sonar-cxx-plugin-${cxx_plugin_version}.jar",
+  require => File["${sonar::home}/extensions/plugins"],
   notify     => Service['sonar'],
+  timeout     => 1200,
 }
 
 

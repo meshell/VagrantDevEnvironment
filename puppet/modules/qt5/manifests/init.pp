@@ -1,6 +1,6 @@
 class qt5 ()  {
   case $::operatingsystem {
-    'Debian','Ubuntu': {
+    'Ubuntu': {
       exec {'apt-add-repository-qt5':
         path       => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
         command => 'apt-add-repository -y ppa:canonical-qt5-edgers/qt5-proper',
@@ -15,9 +15,9 @@ class qt5 ()  {
       }
     }
     default: {
-      fail("g++ ${gcc_version} is not supported yet on ${::operatingsystem}")
+      warning("Qt5 is not supported yet on ${::operatingsystem}")
     }
-  } ->
+  }
   
   package {'dbus-x11':
     ensure => 'installed',
