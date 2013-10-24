@@ -70,6 +70,14 @@ package {'pcmanfm':
   ensure => 'installed',
 }
 
+package {'doxygen':
+  ensure => 'installed',
+}
+
+package {'graphviz':
+  ensure => 'installed',
+}
+
 group {"${user_developer}":
   ensure => present,
 } ->
