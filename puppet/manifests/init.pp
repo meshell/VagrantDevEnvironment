@@ -1,10 +1,3 @@
-class {'base-buildenv':
-  gcc_version => '4.8',
-} 
-
-class {'qt5':
- }
-
 $user_developer = 'developer'
 $user_pwd = '$6$hLUKVOmi$CjXrA8oL9e/3irGl.b3uOllQBgD4P2kjcR3i/EYXfdhLD/5wg./sYO5PccanbEiN1sB6gBFLhslQAEkJjwhd.0'
 
@@ -14,17 +7,6 @@ $repo_name = 'Cpp_CMake_project_template'
 $repo_url = 'https://github.com/meshell/Cpp_CMake_project_template.git'
 $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
-
-
-exec {'apt-get update':
-  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-  command => 'apt-get update',
-} ->
-exec {'safe-upgrade':
-  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-  command => 'aptitude -y -f safe-upgrade',
-  timeout     => 1800,
-}
 
 class cucumber {
   case $::operatingsystem {
@@ -42,6 +24,25 @@ class cucumber {
   } 
 }
 
+class {'base-buildenv':
+  gcc_version => '4.8',
+} 
+
+class {'qt5':
+ }
+
+exec {'apt-get update':
+  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+  command => 'apt-get update',
+} ->
+exec {'safe-upgrade':
+  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+  command => 'aptitude -y -f safe-upgrade',
+  timeout     => 1800,
+}
+
+include cucumber
+
 package {'cppcheck':
   ensure => 'installed',
 }
@@ -58,15 +59,19 @@ package {'subversion':
   ensure => 'installed',
 }
 
-#package {'firefox':
- # ensure => 'installed',
-#}
+package {'firefox':
+  ensure => 'installed',
+}
 
 package {'emacs':
   ensure => 'installed',
 }
 
 package {'pcmanfm':
+  ensure => 'installed',
+}
+
+package {'meld':
   ensure => 'installed',
 }
 
