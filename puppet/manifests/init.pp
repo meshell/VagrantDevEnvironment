@@ -9,20 +9,48 @@ $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
 
 class cucumber {
-  case $::operatingsystem {
-    'Ubuntu': {
+  case $operatingsystem {
+    debian: {
+      package {'cucumber':
+        ensure => 'installed',
+      }
+    }
+    default: {
       package {'cucumber':
         ensure => 'installed',
         provider => 'gem',
       }
     }
-    'Debian': {
-      package {'cucumber':
-        ensure => 'installed',
-      }
-    }
   } 
 }
+
+class system_update {
+  case $operatingsystem {
+    ubuntu, debian : {
+      exec {'apt-get update':
+        path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+        command => 'apt-get update',
+      } ->
+      exec {'safe-upgrade':
+        path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+        command => 'aptitude -y -f safe-upgrade',
+        timeout     => 1800,
+      }
+    }
+    redhat, centos: {
+      exec {'yum update':
+        path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+        command => 'yum -y upgrade',
+	timeout     => 1800,
+      }
+    }
+    default: { 
+      fail("Unrecognized operating system for system update") 
+    }
+  } 	
+}
+
+include system_update
 
 class {'base-buildenv':
   gcc_version => '4.8',
@@ -30,16 +58,6 @@ class {'base-buildenv':
 
 class {'qt5':
  }
-
-exec {'apt-get update':
-  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-  command => 'apt-get update',
-} ->
-exec {'safe-upgrade':
-  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-  command => 'aptitude -y -f safe-upgrade',
-  timeout     => 1800,
-}
 
 include cucumber
 
