@@ -17,7 +17,7 @@ class qt5 ()  {
     default: {
       warning("Qt5 is not supported yet on ${::operatingsystem}")
     }
-  } ->
+  } 
 
   package {'dbus-x11':
     ensure => 'installed',

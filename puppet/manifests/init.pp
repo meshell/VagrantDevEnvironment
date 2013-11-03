@@ -26,14 +26,14 @@ class cucumber {
 
 class system_update {
   case $operatingsystem {
-    ubuntu, debian : {
+    ubuntu,debian : {
       exec {'apt-get update':
         path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
         command => 'apt-get update',
       } ->
-      exec {'safe-upgrade':
+      exec {'upgrade':
         path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-        command => 'aptitude -y -f safe-upgrade',
+        command => 'apt-get -f -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y dist-upgrade',
         timeout     => 1800,
       }
     }
@@ -41,7 +41,7 @@ class system_update {
       exec {'yum update':
         path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
         command => 'yum -y upgrade',
-	timeout     => 1800,
+        timeout     => 1800,
       }
     }
     default: { 
@@ -50,7 +50,29 @@ class system_update {
   } 	
 }
 
+class system_cleanup {
+  case $operatingsystem {
+    ubuntu,debian : {
+      exec {'clean-up':
+        path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+        command => 'aptitude clean --purge-unused',
+      }
+    }
+    redhat, centos: {
+      exec {'yum update':
+        path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+        command => 'yum clean all',
+        timeout   => 1800,
+      }
+    }
+    default: { 
+      fail("Unrecognized operating system for system cleanup") 
+    }
+  } 	
+} 
+
 include system_update
+include system_cleanup
 
 class {'base-buildenv':
   gcc_version => '4.8',
@@ -77,9 +99,22 @@ package {'subversion':
   ensure => 'installed',
 }
 
-package {'firefox':
-  ensure => 'installed',
+class firefox {
+  case $operatingsystem {
+    debian : {
+      package {'iceweasel':
+        ensure => 'installed',
+      }
+    }
+    default : {
+      package {'firefox':
+        ensure => 'installed',
+      }
+    }
+  }
 }
+
+include firefox
 
 package {'emacs':
   ensure => 'installed',
@@ -93,13 +128,14 @@ package {'meld':
   ensure => 'installed',
 }
 
-package {'doxygen':
-  ensure => 'installed',
-}
-
 package {'graphviz':
   ensure => 'installed',
-}
+} 
+
+package {'doxygen':
+  ensure => 'installed',
+  require => Package['graphviz'],
+} 
 
 group {"${user_developer}":
   ensure => present,
@@ -115,7 +151,7 @@ user {"${user_developer}":
   password      => $user_pwd,
 } ->
 
-augeas { "sudodeveloper":
+augeas { 'sudodeveloper':
   context => "/files/etc/sudoers",
   changes => [
     "set spec[user = '${user_developer}']/user ${user_developer}",
@@ -127,22 +163,30 @@ augeas { "sudodeveloper":
 
 package {'git':
   ensure    => 'installed',
-} ->
+}  ->
 
 package {'gitk':
   ensure    => 'installed',
-} ->
+  require => Package['git'],
+}
 
 # Configure Git
 exec {'git-author-name':
   command => "/usr/bin/git config --global user.name '${git_author_name}'",
   unless    => "/usr/bin/git config --global --get user.name|grep '${git_author_name}'",
+  require => Package['git'],
 } ->
 
 exec {'git-author-email':
   command => "/usr/bin/git config --global user.email '${git_author_email}'",
   unless    => "/usr/bin/git config --global --get user.email|grep '{$git_author_email}'",
+  require => Package['git'],
 } ->
+exec {'git-push-default':
+  command => "/usr/bin/git config --global push.default simple",
+  unless    => "/usr/bin/git config --global --get push.default",
+  require => Package['git'],
+} 
 
 vcsrepo {"/home/$user_developer/${repo_name}":
     ensure => present,
@@ -222,8 +266,7 @@ package {'eclipse-cdt':
   require => Class['java'],
 } 
 
-
 # Dependencies
 
-Exec['safe-upgrade'] -> Package <| |>
+Class['system_update'] -> Package <| |>
 User['developer']  -> Vcsrepo <| |>

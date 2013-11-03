@@ -1,12 +1,9 @@
 class base-buildenv ($gcc_version = '4.7')  {
-
   if $gcc_version == '4.8' {
     case $operatingsystem {
+    #  ubuntu, debian: {
       ubuntu: {
-        exec {'apt-add-repository-toolchain':
-          path       => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-          command => 'apt-add-repository -y ppa:ubuntu-toolchain-r/test',
-        } ->
+        class {'base-buildenv::gcc48-package-repo':} ->
         exec { 'gcc update apt-get':
           path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
           command => 'apt-get update',
@@ -18,7 +15,7 @@ class base-buildenv ($gcc_version = '4.7')  {
         exec {"update-alternatives":
           path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
           command => 'update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 40 --slave /usr/bin/g++ g++ /usr/bin/g++-4.8',
-        } ->
+        }->
          exec {'apt-get-remove':
           path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
           command => 'apt-get autoremove',

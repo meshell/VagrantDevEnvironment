@@ -7,15 +7,15 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "raring32-fluxbox"
+  # config.vm.box = "raring32-fluxbox"
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "https://www.dropbox.com/s/zw77pug72hn9hej/raring32-fluxbox.box"
+  # config.vm.box_url = "https://www.dropbox.com/s/zw77pug72hn9hej/raring32-fluxbox.box"
   
   # Crunchbang vagrant configuration
-  # config.vm.box = "crunchbang-waldorf32"
-  # config.vm.box_url = "https://www.dropbox.com/s/ceqhs8ytnv6mriu/crunchbang-waldorf32.box"
+  config.vm.box = "crunchbang-waldorf32"
+  config.vm.box_url = "https://www.dropbox.com/s/ceqhs8ytnv6mriu/crunchbang-waldorf32.box"
   
 
   # Create a forwarded port mapping which allows access to a specific port
