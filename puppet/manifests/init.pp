@@ -172,14 +172,16 @@ package {'gitk':
 
 # Configure Git
 exec {'git-author-name':
-  command => "/usr/bin/git config --global user.name '${git_author_name}'",
-  unless    => "/usr/bin/git config --global --get user.name|grep '${git_author_name}'",
+  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+  command => "git config --system user.name '${git_author_name}'",
+  unless    => "git config --system --get user.name|grep '${git_author_name}'",
   require => Package['git'],
 } ->
 
 exec {'git-author-email':
-  command => "/usr/bin/git config --global user.email '${git_author_email}'",
-  unless    => "/usr/bin/git config --global --get user.email|grep '{$git_author_email}'",
+  path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
+  command => "git config --system user.email '${git_author_email}'",
+  unless    => "git config --system --get user.email|grep '{$git_author_email}'",
   require => Package['git'],
 } ->
 exec {'git-push-default':
