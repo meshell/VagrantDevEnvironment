@@ -8,6 +8,10 @@ $repo_url = 'https://github.com/meshell/Cpp_CMake_project_template.git'
 $git_author_name = 'Michel Estermann'
 $git_author_email = 'estermann.michel@gmail.com'
 
+class{'keyboard':
+  keyboard_layout => "us",
+}
+
 class cucumber {
   case $operatingsystem {
     debian: {
@@ -128,6 +132,14 @@ package {'meld':
   ensure => 'installed',
 }
 
+package {'python-pip':
+  ensure => 'installed',
+} ->
+package { 'cpp-coveralls': 
+    ensure  => latest,
+    provider => pip,
+}
+
 package {'graphviz':
   ensure => 'installed',
 } 
@@ -136,6 +148,7 @@ package {'doxygen':
   ensure => 'installed',
   require => Package['graphviz'],
 } 
+
 
 group {"${user_developer}":
   ensure => present,

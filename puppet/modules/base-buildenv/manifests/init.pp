@@ -10,7 +10,7 @@ class base-buildenv ($gcc_version = '4.7')  {
         } ->
         exec {'g++4.8':
           path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-          command => "apt-get install -f -qq --force-yes g++-4.8",
+          command => 'apt-get install -f -qq --force-yes g++-4.8',
         } ->
         exec {"update-alternatives":
           path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
