@@ -3,7 +3,7 @@ class qt5 ()  {
     ubuntu: {
       exec {'apt-add-repository-qt5':
         path       => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ],
-        command => 'apt-add-repository -y ppa:canonical-qt5-edgers/qt5-proper',
+        command => 'apt-add-repository -y ppa:ubuntu-sdk-team/ppa',
       } ->
       exec { 'qt5 update apt-get':
         path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
@@ -11,7 +11,7 @@ class qt5 ()  {
       } ->
       exec {'install-qt5':
         path       => ['/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/'],
-        command => "apt-get install -qq qtdeclarative5-dev qt5-default qtdeclarative5-qtquick2-plugin qtdeclarative5-test-plugin",
+        command => "apt-get install -qq qtdeclarative5-dev qtbase5-dev qtdeclarative5-qtquick2-plugin qtdeclarative5-test-plugin",
       }
     }
     default: {
