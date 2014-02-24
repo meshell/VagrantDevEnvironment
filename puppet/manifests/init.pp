@@ -20,9 +20,13 @@ class cucumber {
       }
     }
     default: {
+      package {'ruby-dev':
+        ensure => 'installed',
+      }
       package {'cucumber':
         ensure => 'installed',
         provider => 'gem',
+        require => Package['ruby-dev'],
       }
     }
   } 
@@ -82,8 +86,8 @@ class {'base-buildenv':
   gcc_version => '4.8',
 } 
 
-class {'qt5':
- }
+#class {'qt5':
+ #}
 
 include cucumber
 
